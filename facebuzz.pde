@@ -17,8 +17,8 @@ void draw() {
   background(255);
   image(img, 0.0, 0.0);
   if (mousePressed) {
-    mustache.update();
-    if (mustache.is_not_active()) mustache.set_origin();
+    mustache.update(mouseX, mouseY);
+    if (mustache.is_not_active()) mustache.set_origin(mouseX, mouseY);
   }
   mustache.render();
 }

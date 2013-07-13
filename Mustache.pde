@@ -21,7 +21,7 @@ class Mustache {
     }
   }
 
-  public void update() {
+  public void update(float x, float y) {
     // if any of the handles reports being grabbed,
     // update its coordinates
     // but not if the whole shape is being dragged
@@ -30,22 +30,22 @@ class Mustache {
     if (CURRENT == -1) {
       // check if a handle is being grabbed
       for (int i = 0; i < NO_OF_CTRLS; i++) {
-        if (handles[i].check_grabbed()) {
+        if (handles[i].check_grabbed(x,y)) {
           CURRENT = i;
-          handles[CURRENT].update();
+          handles[CURRENT].update(x,y);
           break;
         }
       }
     } 
     else {
       // a handle is selected
-      handles[CURRENT].update();
+      handles[CURRENT].update(x,y);
     }
   }
 
-  public void set_origin() {
-    float dx = mouseX - pmouseX;
-    float dy = mouseY - pmouseY;
+  public void set_origin(float x, float y) {
+    float dx = x - pmouseX;
+    float dy = y - pmouseY;
 //    println(dx + " " + dy);
     DRAGGING = true;
     ORIGIN.x = ORIGIN.x + dx;

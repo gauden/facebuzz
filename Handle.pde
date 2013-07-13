@@ -14,13 +14,13 @@ class Handle {
     GRABBED = false;
   }
 
-  public void update() {
-    pos = new PVector(getNormalX(mouseX), getNormalY(mouseY));
+  public void update(float x, float y) {
+    pos = new PVector(getNormalX(x), getNormalY(y));
   }
 
-  public boolean check_grabbed() {
-    float diffX = abs(mouseX - getRealX());
-    float diffY = abs(mouseY - getRealY());
+  public boolean check_grabbed(float x, float y) {
+    float diffX = abs(x - getRealX());
+    float diffY = abs(y - getRealY());
     if (diffX < rad+rad/2 & diffY < rad+rad/2) {
       GRABBED = true;
     } else {
