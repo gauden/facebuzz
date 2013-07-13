@@ -43,10 +43,9 @@ class Mustache {
     }
   }
 
-  public void set_origin(float x, float y) {
-    float dx = x - pmouseX;
-    float dy = y - pmouseY;
-//    println(dx + " " + dy);
+  public void set_origin(float x, float y, float oldX, float oldY) {
+    float dx = x - oldX;
+    float dy = y - oldY;
     DRAGGING = true;
     ORIGIN.x = ORIGIN.x + dx;
     ORIGIN.y = ORIGIN.y + dy;
