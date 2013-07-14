@@ -3,6 +3,7 @@
 Handle handle;
 Mustache mustache;
 PImage img;
+boolean DRAGGED = false;
 
 // for debugging
 String txtOutput;
@@ -33,6 +34,7 @@ void draw() {
   // for debugging
   fill(color(255, 255, 255, 255));
   txtOutput = mustache.DISPLAY_GUI ? "SHOWING menu" : "HIDING menu";
+  txtOutput += "\n" + DRAGGED;
   text(txtOutput, 30, 30);
 }
 
@@ -42,8 +44,13 @@ void mouseReleased() {
     mustache.CLICK_HANDLED = false;
   }
   else {
-    mustache.toggle_menu();
+    if (!DRAGGED) mustache.toggle_menu();
   }
+  DRAGGED = false;
+}
+
+void mouseDragged() {
+  DRAGGED = true;
 }
 
 
