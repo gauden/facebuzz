@@ -188,14 +188,26 @@ void fill_icon() {
 
 Despite the fact that there are only fifteen handles on the blob (5 red point connectors, and ten blue curve controllers), a surprising number of shapes can be created. This gallery illustrates the range, limited only by one's imagination:
 
+- Dog with Bow-tie
+- The Royal Dog
+- The World through Green-tinted Glasses
+- Ghostly Owner
+- Dreams of Bones to Come
+- Dogged by Romance
+
 ![Dog with Bow-tie](./docs/img/01.jpg)
+
 
 ![The Royal Dog](./docs/img/02.jpg)
 
+
 ![The World through Green-tinted Glasses](./docs/img/03.jpg)
+
 
 ![Ghostly Owner](./docs/img/04.jpg)
 
+
 ![Dreams of Bones to Come](./docs/img/05.jpg)
+
 
 ![Dogged by Romance](./docs/img/06.jpg)
