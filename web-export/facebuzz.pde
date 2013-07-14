@@ -1,17 +1,19 @@
-// Original dog image: Irita Kirsbluma http://flic.kr/p/dUwxVB
+// Original Dog image by Tiago (CC BY 2.0) http://flic.kr/p/ejmQsA
 
 Handle handle;
 Mustache mustache;
 Menu MENU;
 PImage img;
 boolean DRAGGED = false;
+boolean JUST_SAVED_IMG = false;
+String fileName;
 
 // uncomment for debugging
 String txtOutput;
-int clickMillis = 0;
+//int clickMillis = 0;
 
 void setup() {
-  size(480, 640);
+  size(640, 480);
   MENU = new Menu();
   mustache = new Mustache(MENU);
   img = loadImage("dog.png");
@@ -21,28 +23,62 @@ void setup() {
   fill(color(255, 255, 255));
   PFont sans = loadFont("SansSerif-14.vlw");
   textFont(sans, 14);
-  txtOutput = "";
+  //  txtOutput = "";
 }
 
 void draw() {
-  background(255);
-  image(img, 0.0, 0.0);
-  if (mousePressed) {
-    mustache.update(mouseX, mouseY);
-    if (mustache.is_not_active()) mustache.set_origin(mouseX, mouseY, pmouseX, pmouseY);
-  }
-  mustache.render();
+  if (mustache.SAVING_IMAGE & !JUST_SAVED_IMG) {
+    // hide menu and handles
+    // by re-rendering the image tne "mustache"
+    background(255);
+    image(img, 0.0, 0.0);
+    mustache.render();
 
-  if (mustache.DISPLAY_GUI) MENU.render();
+    // save to disc
+    fileName = year() + "_" + day() + "_" + hour() + "_" + minute() + "_" + second() + "_" + millis() + ".png";
+    save("./data/" + fileName);
+    JUST_SAVED_IMG = true;
+    mustache.SAVING_IMAGE = true;
+    mustache.DISPLAY_GUI = false;
+    // print message
+    render_saved();
+    // wait for user to click then clear message and resume
+  } 
+  else {
+    background(255);
+    image(img, 0.0, 0.0);
+    if (mousePressed) {
+      mustache.update(mouseX, mouseY);
+      if (mustache.is_not_active()) mustache.set_origin(mouseX, mouseY, pmouseX, pmouseY);
+    }
+    mustache.render();
+    if (mustache.DISPLAY_GUI) MENU.render();
+  }
+  
+  if (JUST_SAVED_IMG) render_saved();
+  
 
   // uncomment for debugging
-  fill(color(255, 255, 255, 255));
-  txtOutput = mustache.DISPLAY_GUI ? "SHOWING menu" : "HIDING menu";
-  txtOutput += "\n" + DRAGGED;
-  text(txtOutput, 30, 30);
+  //  fill(color(255, 255, 255, 255));
+  //  txtOutput = mustache.DISPLAY_GUI ? "SHOWING menu" : "HIDING menu";
+  //  txtOutput += "\nDragging: " + DRAGGED;
+  //  text(txtOutput, 30, 30);
 }
 
 void mouseReleased() {
+  if (JUST_SAVED_IMG) JUST_SAVED_IMG=false;
+  
+  if (mustache.SAVING_IMAGE) {
+    mustache.DISPLAY_GUI = false;
+    mustache.SAVING_IMAGE = false;
+  }
+  if (mustache.DISPLAY_GUI) {
+    String menu_choice = MENU.checkButtons();
+    if (menu_choice != "") {
+      mustache.do_command(menu_choice);
+    }
+  }
+
   mustache.deselect();
   if (mustache.CLICK_HANDLED) {
     mustache.CLICK_HANDLED = false;
@@ -57,6 +93,20 @@ void mouseDragged() {
   DRAGGED = true;
 }
 
+
+void render_saved() {
+  // display message that image is saved
+  pushStyle();
+  fill(0, 128);
+  noStroke();
+  rect(0, height - 60, width, 60);
+
+
+  fill(color(255, 255, 255, 255));
+  txtOutput = "Image saved as " + fileName;
+  text(txtOutput, 30, height-20);
+  popStyle();
+}
 
 
 int HORIZONTAL = 0;
@@ -677,7 +727,7 @@ class MultiSlider extends Widget
 class Handle {
   PVector pos;
   boolean GRABBED;
-  int rad = 10;
+  int rad = 8;
   int INDEX;
   PVector ORIGIN;
   float SCALE;
@@ -739,8 +789,8 @@ class Handle {
     pushStyle();
     pushMatrix();
     translate(ORIGIN.x, ORIGIN.y);
+    stroke(255);
     color c = INDEX % 3 == 0 ? color(255,0,0) : color(0,0,255);
-    stroke(c);
     fill(c);
     ellipse(pos.x * SCALE, pos.y * SCALE, rad*2, rad*2);
     popMatrix();
@@ -765,10 +815,27 @@ class Menu {
     
     addButton("stroke", "./data/icon_stroke.png");
     addButton("fill", "./data/icon_fill.png");
+    addButton("transparent", "./data/icon_swatch_transparent.png");
     addButton("red", "./data/icon_swatch_red.png");
     addButton("green", "./data/icon_swatch_green.png");
     addButton("yellow", "./data/icon_swatch_yellow.png");
     addButton("blue", "./data/icon_swatch_blue.png");
+    addButton("white", "./data/icon_swatch_white.png");
+    addButton("kontrast", "./data/icon_swatch_black.png");
+    x = width - BTN_WIDTH - BTN_SPACING;
+    addButton("discsave", "./data/icon_discsave.png");
+  }
+  
+  public String checkButtons() {
+    String result = "";
+    for (int i = 0; i < BUTTONS.size(); i++) {
+      Button btn = (Button)BUTTONS.get(i);
+      if (btn.mouseReleased()) {
+        result = btn.name;
+        break;
+      }
+    }
+    return result;
   }
 
   public void addButton(String name, String imgpath) {
@@ -805,10 +872,22 @@ class Mustache {
   float SCALE;
   Menu MENU;
   boolean DRAGGING = false;
+  boolean SAVING_IMAGE = false;
   boolean SHOW_HANDLES = true;
   boolean SEE_THRU = true;
   boolean CLICK_HANDLED = false;
   boolean DISPLAY_GUI = true;
+  
+  color BLACK = color(0,0,0);  
+  color WHITE = color(255,255,255);  
+  color RED = color(204,0,0);  
+  color GREEN = color(0, 128,0);  
+  color BLUE = color(0, 0, 255);  
+  color YELLOW = color(255, 255, 0);
+  
+  boolean FILL = true;
+  boolean TRANSPARENCY = true;
+  color CLR = YELLOW;
 
 
   Mustache(Menu _menu) {
@@ -825,6 +904,7 @@ class Mustache {
   }
   
   public void toggle_menu() {
+    if (mouseY > height - MENU.MENU_HEIGHT) return; // keep menu visible
     DISPLAY_GUI = !DISPLAY_GUI;
   }
 
@@ -877,6 +957,55 @@ class Mustache {
   public boolean is_active() {
     return CURRENT != -1;
   }
+  
+  public void do_command(String choice) {
+    char c = (char) choice.charAt(0);
+    switch (c) {
+      case 'f':
+//        println("Turn fill on");
+        FILL = true;
+        break;
+      case 's':
+//        println("Turn stroke on");
+        FILL = false;
+        break;
+      case 't':
+//        println("Turn transparency on");
+        TRANSPARENCY = !TRANSPARENCY;
+        break;
+      case 'r':
+//        println("Red");
+        CLR = RED;
+        break;
+      case 'g':
+//        println("Green");
+        CLR = GREEN;
+        break;
+      case 'b':
+//        println("Blue");
+        CLR = BLUE;
+        break;
+      case 'y':
+//        println("Yellow");
+        CLR = YELLOW;
+        break;
+      case 'w':
+//        println("White");
+        CLR = WHITE;
+        break;
+      case 'k':
+//        println("Black");
+        CLR = BLACK;
+        break;
+      case 'd':
+        println("Save to disc");
+        SAVING_IMAGE = true;
+        break;
+      default:
+        FILL = true;
+        CLR = YELLOW;
+    }
+  }
 
 
   public void render() {
@@ -886,9 +1015,16 @@ class Mustache {
 
   public void draw_line() {
     pushStyle();
-    noStroke();
-    color c = is_active() || DRAGGING ? color(255, 255, 99, 150) : color(255, 255, 99);
-    fill(c);
+    if (FILL) {
+      noStroke();
+      fill(CLR);
+    } else {
+      strokeWeight(10);
+      noFill();
+      stroke(CLR);
+    }
+    boolean state = is_active() || DRAGGING;
+    set_transparency(state);
     beginShape();
 
     vertex(handles[0].getRealX(), handles[0].getRealY());
@@ -911,7 +1047,7 @@ class Mustache {
   public void draw_handles() {
     pushStyle();
     strokeWeight(1);
-    stroke(255, 0, 0, 150);
+    stroke(255);
     for (int i=-1; i < NO_OF_CTRLS-2; i = i+3) {
       PVector p1 = i==-1 ? handles[NO_OF_CTRLS-1].real_coords() : handles[i].real_coords();
       PVector p2 = handles[i+1].real_coords();
@@ -923,6 +1059,15 @@ class Mustache {
     for (int i = 0; i < NO_OF_CTRLS; i++) {
       handles[i].render();
     }
+  }
+  
+  public void set_transparency(boolean active_or_dragging) {
+    float r = red(CLR);
+    float g = green(CLR);
+    float b = blue(CLR);
+    float a = TRANSPARENCY ? 128 : 255;
+    if (active_or_dragging) a = 128;
+    CLR = color(r,g,b,a);
   }
 }
 
