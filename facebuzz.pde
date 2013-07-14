@@ -4,13 +4,21 @@ Handle handle;
 Mustache mustache;
 PImage img;
 
-// if multitouch events are fired, this is set to true
-//boolean useMultiTouch = false;
+// for debugging
+String txtOutput;
+int clickMillis = 0;
 
 void setup() {
   size(600, 600);
   mustache = new Mustache();
   img = loadImage("cat.jpg");
+  smooth();
+
+  // for debugging
+  fill(color(255, 255, 255));
+  PFont sans = loadFont("SansSerif-14.vlw");
+  textFont(sans, 14);
+  txtOutput = "";
 }
 
 void draw() {
@@ -21,36 +29,22 @@ void draw() {
     if (mustache.is_not_active()) mustache.set_origin(mouseX, mouseY, pmouseX, pmouseY);
   }
   mustache.render();
+
+  // for debugging
+  fill(color(255, 255, 255, 255));
+  txtOutput = mustache.DISPLAY_GUI ? "SHOWING menu" : "HIDING menu";
+  text(txtOutput, 30, 30);
 }
 
 void mouseReleased() {
   mustache.deselect();
+  if (mustache.CLICK_HANDLED) {
+    mustache.CLICK_HANDLED = false;
+  }
+  else {
+    mustache.toggle_menu();
+  }
 }
 
 
-// respond to multitouch events
-// from http://stuff.adrianpark.com/processingjs/sparks/
-// COMMENT THIS OUT TO MAKE APP COMPILE IN PROCESSING IDE
-//*/
-//void touchMove(TouchEvent touchEvent) {
-//  useMultiTouch = true;
-//  int x;
-//  int y;
-//
-//  if (touchEvent.touches.length == 1) {
-//    x = touchEvent.touches[0].offsetX;
-//    y = touchEvent.touches[0].offsetY;
-//    mustache.update(x,y);
-//    if (mustache.is_not_active()) mustache.set_origin(x,y);
-//  } 
-//  else {
-//    for (int i = 0; i < touchEvent.touches.length; i++) {
-//      x = touchEvent.touches[i].offsetX;
-//      y = touchEvent.touches[i].offsetY;
-//
-//      ellipse(x, y, 60, 60);
-//    }
-//  }
-//}
-//*/
 

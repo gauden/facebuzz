@@ -4,6 +4,10 @@ Handle handle;
 Mustache mustache;
 PImage img;
 
+// for debugging
+String txtOutput;
+int clickMillis = 0;
+
 // if multitouch events are fired, this is set to true
 //boolean useMultiTouch = false;
 
@@ -11,6 +15,12 @@ void setup() {
   size(600, 600);
   mustache = new Mustache();
   img = loadImage("cat.jpg");
+  smooth();
+  
+  // for debugging
+  fill(color(255, 255, 255));
+  PFont sans = loadFont("serif");
+  textFont(sans, 14);
 }
 
 void draw() {
@@ -18,13 +28,27 @@ void draw() {
   image(img, 0.0, 0.0);
   if (mousePressed) {
     mustache.update(mouseX, mouseY);
-    if (mustache.is_not_active()) mustache.set_origin(mouseX, mouseY);
+    if (mustache.is_not_active()) mustache.set_origin(mouseX, mouseY, pmouseX, pmouseY);
   }
   mustache.render();
+
+  // for debugging
+  fill(color(255, 255, 255, 255));
+  text(txtOutput, 30, 30);
 }
 
 void mouseReleased() {
   mustache.deselect();
+  if (mustache.CLICK_HANDLED) {
+    txtOutput = "Click handled";
+    mustache.CLICK_HANDLED = false;
+  }
+  else {
+    int thisClick = millis();
+    int diffClick = thisClick - clickMillis;
+    clickMillis = thisClick;
+    txtOutput = diffClick<400 ? "Double-click" : "Single-click";
+  }
 }
 
 
@@ -70,13 +94,13 @@ class Handle {
     GRABBED = false;
   }
 
-  public void update() {
-    pos = new PVector(getNormalX(mouseX), getNormalY(mouseY));
+  public void update(float x, float y) {
+    pos = new PVector(getNormalX(x), getNormalY(y));
   }
 
-  public boolean check_grabbed() {
-    float diffX = abs(mouseX - getRealX());
-    float diffY = abs(mouseY - getRealY());
+  public boolean check_grabbed(float x, float y) {
+    float diffX = abs(x - getRealX());
+    float diffY = abs(y - getRealY());
     if (diffX < rad+rad/2 & diffY < rad+rad/2) {
       GRABBED = true;
     } else {
@@ -135,6 +159,7 @@ class Mustache {
   boolean DRAGGING = false;
   boolean SHOW_HANDLES = true;
   boolean SEE_THRU = true;
+  boolean CLICK_HANDLED = false;
 
 
   Mustache() {
@@ -149,7 +174,7 @@ class Mustache {
     }
   }
 
-  public void update() {
+  public void update(float x, float y) {
     // if any of the handles reports being grabbed,
     // update its coordinates
     // but not if the whole shape is being dragged
@@ -158,23 +183,23 @@ class Mustache {
     if (CURRENT == -1) {
       // check if a handle is being grabbed
       for (int i = 0; i < NO_OF_CTRLS; i++) {
-        if (handles[i].check_grabbed()) {
+        if (handles[i].check_grabbed(x, y)) {
           CURRENT = i;
-          handles[CURRENT].update();
+          handles[CURRENT].update(x, y);
+          CLICK_HANDLED = true;
           break;
         }
       }
     } 
     else {
       // a handle is selected
-      handles[CURRENT].update();
+      handles[CURRENT].update(x, y);
     }
   }
 
-  public void set_origin() {
-    float dx = mouseX - pmouseX;
-    float dy = mouseY - pmouseY;
-//    println(dx + " " + dy);
+  public void set_origin(float x, float y, float oldX, float oldY) {
+    float dx = x - oldX;
+    float dy = y - oldY;
     DRAGGING = true;
     ORIGIN.x = ORIGIN.x + dx;
     ORIGIN.y = ORIGIN.y + dy;
@@ -221,7 +246,7 @@ class Mustache {
     endShape();
     popStyle();
   }
-  
+
   public void toggle_handles() {
     if (DRAGGING) return;
     SHOW_HANDLES = ! SHOW_HANDLES;
@@ -230,7 +255,7 @@ class Mustache {
   public void draw_handles() {
     pushStyle();
     strokeWeight(1);
-    stroke(255,0,0,150);
+    stroke(255, 0, 0, 150);
     for (int i=-1; i < NO_OF_CTRLS-2; i = i+3) {
       PVector p1 = i==-1 ? handles[NO_OF_CTRLS-1].real_coords() : handles[i].real_coords();
       PVector p2 = handles[i+1].real_coords();

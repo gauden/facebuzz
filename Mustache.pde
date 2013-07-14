@@ -7,6 +7,8 @@ class Mustache {
   boolean DRAGGING = false;
   boolean SHOW_HANDLES = true;
   boolean SEE_THRU = true;
+  boolean CLICK_HANDLED = false;
+  boolean DISPLAY_GUI = true;
 
 
   Mustache() {
@@ -17,8 +19,12 @@ class Mustache {
     for (int i = 0; i < NO_OF_CTRLS; i++) {
       x = cos(spacing * i);
       y = sin(spacing * i);
-      handles[i] = new Handle(x, y, i, ORIGIN, SCALE);
+      handles[i] = new Handle(x, y, i, ORIGIN, SCALE, this);
     }
+  }
+  
+  public void toggle_menu() {
+    DISPLAY_GUI = !DISPLAY_GUI;
   }
 
   public void update(float x, float y) {
@@ -26,24 +32,26 @@ class Mustache {
     // update its coordinates
     // but not if the whole shape is being dragged
     // or if handles are hidden
-    if (DRAGGING || ! SHOW_HANDLES) return; 
+    if (DRAGGING || ! SHOW_HANDLES || DISPLAY_GUI) return; 
     if (CURRENT == -1) {
       // check if a handle is being grabbed
       for (int i = 0; i < NO_OF_CTRLS; i++) {
-        if (handles[i].check_grabbed(x,y)) {
+        if (handles[i].check_grabbed(x, y)) {
           CURRENT = i;
-          handles[CURRENT].update(x,y);
+          handles[CURRENT].update(x, y);
+          CLICK_HANDLED = true;
           break;
         }
       }
     } 
     else {
       // a handle is selected
-      handles[CURRENT].update(x,y);
+      handles[CURRENT].update(x, y);
     }
   }
 
   public void set_origin(float x, float y, float oldX, float oldY) {
+    if (DISPLAY_GUI) return; // no movement of mustache when in menu mode
     float dx = x - oldX;
     float dy = y - oldY;
     DRAGGING = true;
@@ -52,6 +60,7 @@ class Mustache {
     for (int i = 0; i < NO_OF_CTRLS; i++) {
       handles[i].set_origin(ORIGIN);
     }
+    if (dx != 0 || dy != 0) CLICK_HANDLED = true;
   }
 
   public void deselect() {
@@ -71,7 +80,7 @@ class Mustache {
 
   public void render() {
     draw_line();
-    if (SHOW_HANDLES & ! DRAGGING) draw_handles();
+    if (SHOW_HANDLES & ! DRAGGING & !DISPLAY_GUI) draw_handles();
   }
 
   public void draw_line() {
@@ -92,7 +101,7 @@ class Mustache {
     endShape();
     popStyle();
   }
-  
+
   public void toggle_handles() {
     if (DRAGGING) return;
     SHOW_HANDLES = ! SHOW_HANDLES;
@@ -101,7 +110,7 @@ class Mustache {
   public void draw_handles() {
     pushStyle();
     strokeWeight(1);
-    stroke(255,0,0,150);
+    stroke(255, 0, 0, 150);
     for (int i=-1; i < NO_OF_CTRLS-2; i = i+3) {
       PVector p1 = i==-1 ? handles[NO_OF_CTRLS-1].real_coords() : handles[i].real_coords();
       PVector p2 = handles[i+1].real_coords();

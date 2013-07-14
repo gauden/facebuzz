@@ -5,13 +5,15 @@ class Handle {
   int INDEX;
   PVector ORIGIN;
   float SCALE;
+  Mustache PARENT;
 
-  Handle(float x, float y, int index, PVector o, float s) {
+  Handle(float x, float y, int index, PVector o, float s, Mustache parent) {
     ORIGIN = o;
     SCALE = s;
     pos = new PVector(x, y);
     INDEX = index;
     GRABBED = false;
+    PARENT = parent;
   }
 
   public void update(float x, float y) {
