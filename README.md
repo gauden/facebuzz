@@ -1,4 +1,4 @@
-# FaceBuzz: Defacing Bitmaps with a Vector Blob
+# FaceBuzz: Fun with Blobs on Photos
 
 ## Credits
 
