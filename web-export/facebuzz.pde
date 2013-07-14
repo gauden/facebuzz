@@ -1,26 +1,27 @@
-// Cat photograph by Aristote2 on https://commons.wikimedia.org/wiki/File:Daphnis_1.JPG
+// Original dog image: Irita Kirsbluma http://flic.kr/p/dUwxVB
 
 Handle handle;
 Mustache mustache;
+Menu MENU;
 PImage img;
+boolean DRAGGED = false;
 
-// for debugging
+// uncomment for debugging
 String txtOutput;
 int clickMillis = 0;
 
-// if multitouch events are fired, this is set to true
-//boolean useMultiTouch = false;
-
 void setup() {
-  size(600, 600);
-  mustache = new Mustache();
-  img = loadImage("cat.jpg");
+  size(480, 640);
+  MENU = new Menu();
+  mustache = new Mustache(MENU);
+  img = loadImage("dog.png");
   smooth();
-  
-  // for debugging
+
+  // uncomment for debugging
   fill(color(255, 255, 255));
-  PFont sans = loadFont("serif");
+  PFont sans = loadFont("SansSerif-14.vlw");
   textFont(sans, 14);
+  txtOutput = "";
 }
 
 void draw() {
@@ -32,51 +33,646 @@ void draw() {
   }
   mustache.render();
 
-  // for debugging
+  if (mustache.DISPLAY_GUI) MENU.render();
+
+  // uncomment for debugging
   fill(color(255, 255, 255, 255));
+  txtOutput = mustache.DISPLAY_GUI ? "SHOWING menu" : "HIDING menu";
+  txtOutput += "\n" + DRAGGED;
   text(txtOutput, 30, 30);
 }
 
 void mouseReleased() {
   mustache.deselect();
   if (mustache.CLICK_HANDLED) {
-    txtOutput = "Click handled";
     mustache.CLICK_HANDLED = false;
   }
   else {
-    int thisClick = millis();
-    int diffClick = thisClick - clickMillis;
-    clickMillis = thisClick;
-    txtOutput = diffClick<400 ? "Double-click" : "Single-click";
+    if (!DRAGGED) mustache.toggle_menu();
   }
+  DRAGGED = false;
+}
+
+void mouseDragged() {
+  DRAGGED = true;
 }
 
 
-// respond to multitouch events
-// from http://stuff.adrianpark.com/processingjs/sparks/
-// COMMENT THIS OUT TO MAKE APP COMPILE IN PROCESSING IDE
-//*/
-//void touchMove(TouchEvent touchEvent) {
-//  useMultiTouch = true;
-//  int x;
-//  int y;
-//
-//  if (touchEvent.touches.length == 1) {
-//    x = touchEvent.touches[0].offsetX;
-//    y = touchEvent.touches[0].offsetY;
-//    mustache.update(x,y);
-//    if (mustache.is_not_active()) mustache.set_origin(x,y);
-//  } 
-//  else {
-//    for (int i = 0; i < touchEvent.touches.length; i++) {
-//      x = touchEvent.touches[i].offsetX;
-//      y = touchEvent.touches[i].offsetY;
-//
-//      ellipse(x, y, 60, 60);
-//    }
-//  }
-//}
-//*/
+
+int HORIZONTAL = 0;
+int VERTICAL   = 1;
+int UPWARDS    = 2;
+int DOWNWARDS  = 3;
+
+class Widget
+{
+
+  
+  PVector pos;
+  PVector extents;
+  String name;
+
+  color inactiveColor = color(60, 60, 100);
+  color activeColor = color(100, 100, 160);
+  color bgColor = inactiveColor;
+  color lineColor = color(255);
+  
+  
+  
+  void setInactiveColor(color c)
+  {
+    inactiveColor = c;
+    bgColor = inactiveColor;
+  }
+  
+  color getInactiveColor()
+  {
+    return inactiveColor;
+  }
+  
+  void setActiveColor(color c)
+  {
+    activeColor = c;
+  }
+  
+  color getActiveColor()
+  {
+    return activeColor;
+  }
+  
+  void setLineColor(color c)
+  {
+    lineColor = c;
+  }
+  
+  color getLineColor()
+  {
+    return lineColor;
+  }
+  
+  String getName()
+  {
+    return name;
+  }
+  
+  void setName(String nm)
+  {
+    name = nm;
+  }
+
+
+  Widget(String t, int x, int y, int w, int h)
+  {
+    pos = new PVector(x, y);
+    extents = new PVector (w, h);
+    name = t;
+    //registerMethod("mouseEvent", this);
+  }
+
+  void display()
+  {
+  }
+
+  boolean isClicked()
+  {
+    if (mouseX > pos.x && mouseX < pos.x+extents.x 
+      && mouseY > pos.y && mouseY < pos.y+extents.y)
+    {
+      //println(mouseX + " " + mouseY);
+      return true;
+    }
+    else
+    {
+      return false;
+    }
+  }
+  
+  public void mouseEvent(MouseEvent event)
+  {
+    //if (event.getFlavor() == MouseEvent.PRESS)
+    //{
+    //  mousePressed();
+    //}
+  }
+  
+  
+  boolean mousePressed()
+  {
+    return isClicked();
+  }
+  
+  boolean mouseDragged()
+  {
+    return isClicked();
+  }
+  
+  
+  boolean mouseReleased()
+  {
+    return isClicked();
+  }
+}
+
+class Button extends Widget
+{
+  PImage activeImage = null;
+  PImage inactiveImage = null;
+  PImage currentImage = null;
+  color imageTint = color(255);
+  
+  Button(String nm, int x, int y, int w, int h)
+  {
+    super(nm, x, y, w, h);
+  }
+  
+  void setImage(PImage img)
+  {
+    setInactiveImage(img);
+    setActiveImage(img);
+  }
+  
+  void setInactiveImage(PImage img)
+  {
+    if(currentImage == inactiveImage || currentImage == null)
+    {
+      inactiveImage = img;
+      currentImage = inactiveImage;
+    }
+    else
+    {
+      inactiveImage = img;
+    }
+  }
+  
+  void setActiveImage(PImage img)
+  {
+    if(currentImage == activeImage || currentImage == null)
+    {
+      activeImage = img;
+      currentImage = activeImage;
+    }
+    else
+    {
+      activeImage = img;
+    }
+  }
+  
+  void setImageTint(color c)
+  {
+    imageTint = c;
+  }
+
+  void display()
+  {
+    if(currentImage != null)
+    {
+      //float imgHeight = (extents.x*currentImage.height)/currentImage.width;
+      float imgWidth = (extents.y*currentImage.width)/currentImage.height;
+      
+      
+      pushStyle();
+      imageMode(CORNER);
+      //tint(imageTint);
+      image(currentImage, pos.x, pos.y, imgWidth, extents.y);
+      stroke(bgColor);
+      noFill();
+      rect(pos.x, pos.y, imgWidth,  extents.y);
+      //noTint();
+      popStyle();
+    }
+    else
+    {
+      pushStyle();
+      stroke(lineColor);
+      fill(bgColor);
+      rect(pos.x, pos.y, extents.x, extents.y);
+  
+      fill(lineColor);
+      textAlign(CENTER, CENTER);
+      text(name, pos.x + 0.5*extents.x, pos.y + 0.5* extents.y);
+      popStyle();
+    }
+  }
+  
+  boolean mousePressed()
+  {
+    if (super.mousePressed())
+    {
+      bgColor = activeColor;
+      if(activeImage != null)
+        currentImage = activeImage;
+      return true;
+    }
+    return false;
+  }
+  
+  boolean mouseReleased()
+  {
+    if (super.mouseReleased())
+    {
+      bgColor = inactiveColor;
+      if(inactiveImage != null)
+        currentImage = inactiveImage;
+      return true;
+    }
+    return false;
+  }
+}
+
+class Toggle extends Button
+{
+  boolean on = false;
+
+  Toggle(String nm, int x, int y, int w, int h)
+  {
+    super(nm, x, y, w, h);
+  }
+
+
+  boolean get()
+  {
+    return on;
+  }
+
+  void set(boolean val)
+  {
+    on = val;
+    if (on)
+    {
+      bgColor = activeColor;
+      if(activeImage != null)
+        currentImage = activeImage;
+    }
+    else
+    {
+      bgColor = inactiveColor;
+      if(inactiveImage != null)
+        currentImage = inactiveImage;
+    }
+  }
+
+  void toggle()
+  {
+    set(!on);
+  }
+
+  
+  boolean mousePressed()
+  {
+    return super.isClicked();
+  }
+
+  boolean mouseReleased()
+  {
+    if (super.mouseReleased())
+    {
+      toggle();
+      return true;
+    }
+    return false;
+  }
+}
+
+class RadioButtons extends Widget
+{
+  public Toggle [] buttons;
+  
+  RadioButtons (int numButtons, int x, int y, int w, int h, int orientation)
+  {
+    super("", x, y, w*numButtons, h);
+    buttons = new Toggle[numButtons];
+    for (int i = 0; i < buttons.length; i++)
+    {
+      int bx, by;
+      if(orientation == HORIZONTAL)
+      {
+        bx = x+i*(w+5);
+        by = y;
+      }
+      else
+      {
+        bx = x;
+        by = y+i*(h+5);
+      }
+      buttons[i] = new Toggle("", bx, by, w, h);
+    }
+  }
+  
+  void setNames(String [] names)
+  {
+    for (int i = 0; i < buttons.length; i++)
+    {
+      if(i >= names.length)
+        break;
+      buttons[i].setName(names[i]);
+    }
+  }
+  
+  void setImage(int i, PImage img)
+  {
+    setInactiveImage(i, img);
+    setActiveImage(i, img);
+  }
+  
+  void setAllImages(PImage img)
+  {
+    setAllInactiveImages(img);
+    setAllActiveImages(img);
+  }
+  
+  void setInactiveImage(int i, PImage img)
+  {
+    buttons[i].setInactiveImage(img);
+  }
+
+  
+  void setAllInactiveImages(PImage img)
+  {
+    for (int i = 0; i < buttons.length; i++)
+    {
+      buttons[i].setInactiveImage(img);
+    }
+  }
+  
+  void setActiveImage(int i, PImage img)
+  {
+    buttons[i].setActiveImage(img);
+  }
+  
+  
+  
+  void setAllActiveImages(PImage img)
+  {
+    for (int i = 0; i < buttons.length; i++)
+    {
+      buttons[i].setActiveImage(img);
+    }
+  }
+
+  void set(String buttonName)
+  {
+    for (int i = 0; i < buttons.length; i++)
+    {
+      if(buttons[i].getName().equals(buttonName))
+      {
+        buttons[i].set(true);
+      }
+      else
+      {
+        buttons[i].set(false);
+      }
+    }
+  }
+  
+  int get()
+  {
+    for (int i = 0; i < buttons.length; i++)
+    {
+      if(buttons[i].get())
+      {
+        return i;
+      }
+    }
+    return -1;
+  }
+  
+  String getString()
+  {
+    for (int i = 0; i < buttons.length; i++)
+    {
+      if(buttons[i].get())
+      {
+        return buttons[i].getName();
+      }
+    }
+    return "";
+  }
+
+  void display()
+  {
+    for (int i = 0; i < buttons.length; i++)
+    {
+      buttons[i].display();
+    }
+  }
+
+  boolean mousePressed()
+  {
+    for (int i = 0; i < buttons.length; i++)
+    {
+      if(buttons[i].mousePressed())
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+  
+  boolean mouseDragged()
+  {
+    for (int i = 0; i < buttons.length; i++)
+    {
+      if(buttons[i].mouseDragged())
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  boolean mouseReleased()
+  {
+    for (int i = 0; i < buttons.length; i++)
+    {
+      if(buttons[i].mouseReleased())
+      {
+        for(int j = 0; j < buttons.length; j++)
+        {
+          if(i != j)
+            buttons[j].set(false);
+        }
+        //buttons[i].set(true);
+        return true;
+      }
+    }
+    return false;
+  }
+}
+
+class Slider extends Widget
+{
+  float minimum;
+  float maximum;
+  float val;
+  int textWidth = 60;
+  int orientation = HORIZONTAL;
+
+  Slider(String nm, float v, float min, float max, int x, int y, int w, int h, int ori)
+  {
+    super(nm, x, y, w, h);
+    val = v;
+    minimum = min;
+    maximum = max;
+    orientation = ori;
+    if(orientation == HORIZONTAL)
+      textWidth = 60;
+    else
+      textWidth = 20;
+  }
+
+  float get()
+  {
+    return val;
+  }
+
+  void set(float v)
+  {
+    val = v;
+    val = constrain(val, minimum, maximum);
+  }
+
+  void display()
+  {
+    pushStyle();
+    textAlign(LEFT, TOP);
+    fill(lineColor);
+    text(name, pos.x, pos.y);
+    stroke(lineColor);
+    noFill();
+    if(orientation ==  HORIZONTAL){
+      rect(pos.x+textWidth, pos.y, extents.x-textWidth, extents.y);
+    } else {
+      rect(pos.x, pos.y+textWidth, extents.x, extents.y-textWidth);
+    }
+    noStroke();
+    fill(bgColor);
+    float sliderPos; 
+    if(orientation ==  HORIZONTAL){
+        sliderPos = map(val, minimum, maximum, 0, extents.x-textWidth-4); 
+        rect(pos.x+textWidth+2, pos.y+2, sliderPos, extents.y-4);
+    } else if(orientation ==  VERTICAL || orientation == DOWNWARDS){
+        sliderPos = map(val, minimum, maximum, 0, extents.y-textWidth-4); 
+        rect(pos.x+2, pos.y+textWidth+2, extents.x-4, sliderPos);
+    } else if(orientation == UPWARDS){
+        sliderPos = map(val, minimum, maximum, 0, extents.y-textWidth-4); 
+        rect(pos.x+2, pos.y+textWidth+2 + (extents.y-textWidth-4-sliderPos), extents.x-4, sliderPos);
+    };
+    popStyle();
+  }
+
+  
+  boolean mouseDragged()
+  {
+    if (super.mouseDragged())
+    {
+      if(orientation ==  HORIZONTAL){
+        set(map(mouseX, pos.x+textWidth, pos.x+extents.x-4, minimum, maximum));
+      } else if(orientation ==  VERTICAL || orientation == DOWNWARDS){
+        set(map(mouseY, pos.y+textWidth, pos.y+extents.y-4, minimum, maximum));
+      } else if(orientation == UPWARDS){
+        set(map(mouseY, pos.y+textWidth, pos.y+extents.y-4, maximum, minimum));
+      };
+      return true;
+    }
+    return false;
+  }
+
+  boolean mouseReleased()
+  {
+    if (super.mouseReleased())
+    {
+      if(orientation ==  HORIZONTAL){
+        set(map(mouseX, pos.x+textWidth, pos.x+extents.x-10, minimum, maximum));
+      } else if(orientation ==  VERTICAL || orientation == DOWNWARDS){
+        set(map(mouseY, pos.y+textWidth, pos.y+extents.y-10, minimum, maximum));
+      } else if(orientation == UPWARDS){
+        set(map(mouseY, pos.y+textWidth, pos.y+extents.y-10, maximum, minimum));
+      };
+      return true;
+    }
+    return false;
+  }
+}
+
+class MultiSlider extends Widget
+{
+  Slider [] sliders;
+
+  MultiSlider(String [] nm, float min, float max, int x, int y, int w, int h, int orientation)
+  {
+    super(nm[0], x, y, w, h*nm.length);
+    sliders = new Slider[nm.length];
+    for (int i = 0; i < sliders.length; i++)
+    {
+      int bx, by;
+      if(orientation == HORIZONTAL)
+      {
+        bx = x;
+        by = y+i*h;
+      }
+      else
+      {
+        bx = x+i*w;
+        by = y;
+      }
+      sliders[i] = new Slider(nm[i], 0, min, max, bx, by, w, h, orientation);
+    }
+  }
+
+  void set(int i, float v)
+  {
+    if(i >= 0 && i < sliders.length)
+    {
+      sliders[i].set(v);
+    }
+  }
+  
+  float get(int i)
+  {
+    if(i >= 0 && i < sliders.length)
+    {
+      return sliders[i].get();
+    }
+    else
+    {
+      return -1;
+    }
+    
+  }
+
+  void display()
+  {
+    for (int i = 0; i < sliders.length; i++)
+    {
+      sliders[i].display();
+    }
+  }
+
+  
+  boolean mouseDragged()
+  {
+    for (int i = 0; i < sliders.length; i++)
+    {
+      if(sliders[i].mouseDragged())
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  boolean mouseReleased()
+  {
+    for (int i = 0; i < sliders.length; i++)
+    {
+      if(sliders[i].mouseReleased())
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+}
 
 class Handle {
   PVector pos;
@@ -85,13 +681,15 @@ class Handle {
   int INDEX;
   PVector ORIGIN;
   float SCALE;
+  Mustache PARENT;
 
-  Handle(float x, float y, int index, PVector o, float s) {
+  Handle(float x, float y, int index, PVector o, float s, Mustache parent) {
     ORIGIN = o;
     SCALE = s;
     pos = new PVector(x, y);
     INDEX = index;
     GRABBED = false;
+    PARENT = parent;
   }
 
   public void update(float x, float y) {
@@ -150,19 +748,71 @@ class Handle {
   }
 }
 
+class Menu {
+  ArrayList<Button> BUTTONS; 
+  int BTN_HEIGHT = 36;
+  int BTN_WIDTH = 36;
+  int MENU_HEIGHT = 60;
+  int BTN_SPACING = 5; 
+  int x, y, w, h;
+
+  Menu() {
+    BUTTONS = new ArrayList<Button>();
+    x = BTN_SPACING;
+    y = height - MENU_HEIGHT + (MENU_HEIGHT - BTN_HEIGHT)/2;
+    w = 36;
+    h = 36;
+    
+    addButton("stroke", "./data/icon_stroke.png");
+    addButton("fill", "./data/icon_fill.png");
+    addButton("red", "./data/icon_swatch_red.png");
+    addButton("green", "./data/icon_swatch_green.png");
+    addButton("yellow", "./data/icon_swatch_yellow.png");
+    addButton("blue", "./data/icon_swatch_blue.png");
+  }
+
+  public void addButton(String name, String imgpath) {
+    Button btn = new Button(name, x, y, w, h);
+    PImage img = loadImage(imgpath);
+    btn.setImage(img);
+    BUTTONS.add(btn);
+    x = x + BTN_SPACING + BTN_WIDTH;
+  }
+
+  public void render() {
+    // Show Menu
+    // draw a transparent rectangle behind the UI to make it
+    // more visible
+    pushStyle();
+    fill(0, 128);
+    noStroke();
+    rect(0, height - 60, width, 60);
+
+    // draw all the UI elements
+    for (int i = 0; i < BUTTONS.size(); i++) {
+      Button btn = (Button)BUTTONS.get(i);
+      btn.display();
+    }
+    popStyle();
+  }
+}
+
 class Mustache {
   int NO_OF_CTRLS = 15; // must be a multiple of 3
   int CURRENT = -1;
   Handle[] handles = new Handle[NO_OF_CTRLS];
   PVector ORIGIN;
   float SCALE;
+  Menu MENU;
   boolean DRAGGING = false;
   boolean SHOW_HANDLES = true;
   boolean SEE_THRU = true;
   boolean CLICK_HANDLED = false;
+  boolean DISPLAY_GUI = true;
 
 
-  Mustache() {
+  Mustache(Menu _menu) {
+    MENU = _menu;
     float x, y;
     float spacing = TWO_PI / NO_OF_CTRLS;
     SCALE = width / 4;
@@ -170,8 +820,12 @@ class Mustache {
     for (int i = 0; i < NO_OF_CTRLS; i++) {
       x = cos(spacing * i);
       y = sin(spacing * i);
-      handles[i] = new Handle(x, y, i, ORIGIN, SCALE);
+      handles[i] = new Handle(x, y, i, ORIGIN, SCALE, this);
     }
+  }
+  
+  public void toggle_menu() {
+    DISPLAY_GUI = !DISPLAY_GUI;
   }
 
   public void update(float x, float y) {
@@ -179,7 +833,7 @@ class Mustache {
     // update its coordinates
     // but not if the whole shape is being dragged
     // or if handles are hidden
-    if (DRAGGING || ! SHOW_HANDLES) return; 
+    if (DRAGGING || ! SHOW_HANDLES || DISPLAY_GUI) return; 
     if (CURRENT == -1) {
       // check if a handle is being grabbed
       for (int i = 0; i < NO_OF_CTRLS; i++) {
@@ -198,6 +852,7 @@ class Mustache {
   }
 
   public void set_origin(float x, float y, float oldX, float oldY) {
+    if (DISPLAY_GUI) return; // no movement of mustache when in menu mode
     float dx = x - oldX;
     float dy = y - oldY;
     DRAGGING = true;
@@ -206,6 +861,7 @@ class Mustache {
     for (int i = 0; i < NO_OF_CTRLS; i++) {
       handles[i].set_origin(ORIGIN);
     }
+    if (dx != 0 || dy != 0) CLICK_HANDLED = true;
   }
 
   public void deselect() {
@@ -225,7 +881,7 @@ class Mustache {
 
   public void render() {
     draw_line();
-    if (SHOW_HANDLES & ! DRAGGING) draw_handles();
+    if (SHOW_HANDLES & ! DRAGGING & !DISPLAY_GUI) draw_handles();
   }
 
   public void draw_line() {

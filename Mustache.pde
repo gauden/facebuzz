@@ -4,14 +4,28 @@ class Mustache {
   Handle[] handles = new Handle[NO_OF_CTRLS];
   PVector ORIGIN;
   float SCALE;
+  Menu MENU;
   boolean DRAGGING = false;
+  boolean SAVING_IMAGE = false;
   boolean SHOW_HANDLES = true;
   boolean SEE_THRU = true;
   boolean CLICK_HANDLED = false;
   boolean DISPLAY_GUI = true;
+  
+  color BLACK = color(0,0,0);  
+  color WHITE = color(255,255,255);  
+  color RED = color(204,0,0);  
+  color GREEN = color(0, 128,0);  
+  color BLUE = color(0, 0, 255);  
+  color YELLOW = color(255, 255, 0);
+  
+  boolean FILL = true;
+  boolean TRANSPARENCY = true;
+  color CLR = YELLOW;
 
 
-  Mustache() {
+  Mustache(Menu _menu) {
+    MENU = _menu;
     float x, y;
     float spacing = TWO_PI / NO_OF_CTRLS;
     SCALE = width / 4;
@@ -24,6 +38,7 @@ class Mustache {
   }
   
   public void toggle_menu() {
+    if (mouseY > height - MENU.MENU_HEIGHT) return; // keep menu visible
     DISPLAY_GUI = !DISPLAY_GUI;
   }
 
@@ -76,6 +91,55 @@ class Mustache {
   public boolean is_active() {
     return CURRENT != -1;
   }
+  
+  public void do_command(String choice) {
+    char c = (char) choice.charAt(0);
+    switch (c) {
+      case 'f':
+//        println("Turn fill on");
+        FILL = true;
+        break;
+      case 's':
+//        println("Turn stroke on");
+        FILL = false;
+        break;
+      case 't':
+//        println("Turn transparency on");
+        TRANSPARENCY = !TRANSPARENCY;
+        break;
+      case 'r':
+//        println("Red");
+        CLR = RED;
+        break;
+      case 'g':
+//        println("Green");
+        CLR = GREEN;
+        break;
+      case 'b':
+//        println("Blue");
+        CLR = BLUE;
+        break;
+      case 'y':
+//        println("Yellow");
+        CLR = YELLOW;
+        break;
+      case 'w':
+//        println("White");
+        CLR = WHITE;
+        break;
+      case 'k':
+//        println("Black");
+        CLR = BLACK;
+        break;
+      case 'd':
+        println("Save to disc");
+        SAVING_IMAGE = true;
+        break;
+      default:
+        FILL = true;
+        CLR = YELLOW;
+    }
+  }
 
 
   public void render() {
@@ -85,9 +149,16 @@ class Mustache {
 
   public void draw_line() {
     pushStyle();
-    noStroke();
-    color c = is_active() || DRAGGING ? color(255, 255, 99, 150) : color(255, 255, 99);
-    fill(c);
+    if (FILL) {
+      noStroke();
+      fill(CLR);
+    } else {
+      strokeWeight(10);
+      noFill();
+      stroke(CLR);
+    }
+    boolean state = is_active() || DRAGGING;
+    set_transparency(state);
     beginShape();
 
     vertex(handles[0].getRealX(), handles[0].getRealY());
@@ -110,7 +181,7 @@ class Mustache {
   public void draw_handles() {
     pushStyle();
     strokeWeight(1);
-    stroke(255, 0, 0, 150);
+    stroke(255);
     for (int i=-1; i < NO_OF_CTRLS-2; i = i+3) {
       PVector p1 = i==-1 ? handles[NO_OF_CTRLS-1].real_coords() : handles[i].real_coords();
       PVector p2 = handles[i+1].real_coords();
@@ -122,6 +193,15 @@ class Mustache {
     for (int i = 0; i < NO_OF_CTRLS; i++) {
       handles[i].render();
     }
+  }
+  
+  public void set_transparency(boolean active_or_dragging) {
+    float r = red(CLR);
+    float g = green(CLR);
+    float b = blue(CLR);
+    float a = TRANSPARENCY ? 128 : 255;
+    if (active_or_dragging) a = 128;
+    CLR = color(r,g,b,a);
   }
 }
 

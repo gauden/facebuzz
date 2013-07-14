@@ -1,7 +1,7 @@
 class Handle {
   PVector pos;
   boolean GRABBED;
-  int rad = 10;
+  int rad = 8;
   int INDEX;
   PVector ORIGIN;
   float SCALE;
@@ -63,8 +63,8 @@ class Handle {
     pushStyle();
     pushMatrix();
     translate(ORIGIN.x, ORIGIN.y);
+    stroke(255);
     color c = INDEX % 3 == 0 ? color(255,0,0) : color(0,0,255);
-    stroke(c);
     fill(c);
     ellipse(pos.x * SCALE, pos.y * SCALE, rad*2, rad*2);
     popMatrix();
