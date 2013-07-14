@@ -1,4 +1,13 @@
-// Original Dog image by Tiago (CC BY 2.0) http://flic.kr/p/ejmQsA
+/** 
+ **   F A C E B U Z Z: 
+ **   A toy for defacing bitmaps with vectors
+ **
+ **   FaceBuzz by Gauden Galea, 2013
+ **   GUI Classes by Mick Grierson, Matthew Yee-King, Marco Gillies
+ **    
+ **   Software is licensed under the MIT license, see LICENSE
+ **   Dog image by Tiago (CC BY 2.0) http://flic.kr/p/ejmQsA
+ **/
 
 Handle handle;
 Mustache mustache;
@@ -6,7 +15,8 @@ Menu MENU;
 PImage img;
 boolean DRAGGED = false;
 boolean JUST_SAVED_IMG = false;
-String fileName;
+String INPUT_IMAGE = "dog.png";
+String fileName = "";
 
 // uncomment for debugging
 String txtOutput;
@@ -16,7 +26,7 @@ void setup() {
   size(640, 480);
   MENU = new Menu();
   mustache = new Mustache(MENU);
-  img = loadImage("dog.png");
+  img = loadImage(INPUT_IMAGE);
   smooth();
 
   // uncomment for debugging
