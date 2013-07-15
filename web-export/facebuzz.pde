@@ -29,7 +29,7 @@ void setup() {
   mustache = new Mustache(MENU);
   img = loadImage(INPUT_IMAGE);
   smooth();
-  
+
   // Hack to detect if this is running in Java or Javascript mode
   // Java will download the same image twice for t1 and t2
   // JavaScript has no access to data folder, so t2 is empty
@@ -86,7 +86,8 @@ void draw() {
 }
 
 void mouseReleased() {
-  if (JUST_SAVED_IMG) JUST_SAVED_IMG=false;
+//  println(mouseX + " " + mouseY);
+  if (JUST_SAVED_IMG) JUST_SAVED_IMG = false;
 
   if (mustache.SAVING_IMAGE) {
     mustache.DISPLAY_GUI = false;
@@ -208,7 +209,7 @@ class Widget
     if (mouseX > pos.x && mouseX < pos.x+extents.x 
       && mouseY > pos.y && mouseY < pos.y+extents.y)
     {
-      //println(mouseX + " " + mouseY);
+//      println(mouseX + " " + mouseY);
       return true;
     }
     else
@@ -1007,11 +1008,11 @@ class Mustache {
 //        println("Black");
         CLR = BLACK;
     } else if (choice.equals("save")) {
-      if (JAVASCRIPT_MODE) {
-        println("JavaScript detected: download image.");
-      } else {
-        println("Java detected: save to disc");
-      }
+//      if (JAVASCRIPT_MODE) {
+//        println("JavaScript detected: download image.");
+//      } else {
+//        println("Java detected: save to disc");
+//      }
         SAVING_IMAGE = true;
     } else {
         FILL = true;

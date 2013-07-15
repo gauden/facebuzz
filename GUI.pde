@@ -78,7 +78,7 @@ class Widget
     if (mouseX > pos.x && mouseX < pos.x+extents.x 
       && mouseY > pos.y && mouseY < pos.y+extents.y)
     {
-      //println(mouseX + " " + mouseY);
+//      println(mouseX + " " + mouseY);
       return true;
     }
     else
