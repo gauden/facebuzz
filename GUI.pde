@@ -20,9 +20,9 @@ class Widget
   
   
   void setInactiveColor(color c)
-  {
-    inactiveColor = c;
-    bgColor = inactiveColor;
+  { // commented out for facebuzz
+//    inactiveColor = c;
+//    bgColor = inactiveColor;
   }
   
   color getInactiveColor()
@@ -31,8 +31,8 @@ class Widget
   }
   
   void setActiveColor(color c)
-  {
-    activeColor = c;
+  { // commented out for facebuzz
+//    activeColor = c;
   }
   
   color getActiveColor()
@@ -174,9 +174,9 @@ class Button extends Widget
       imageMode(CORNER);
       //tint(imageTint);
       image(currentImage, pos.x, pos.y, imgWidth, extents.y);
-      stroke(bgColor);
-      noFill();
-      rect(pos.x, pos.y, imgWidth,  extents.y);
+//      stroke(bgColor);
+//      noFill();
+//      rect(pos.x, pos.y, imgWidth,  extents.y);
       //noTint();
       popStyle();
     }

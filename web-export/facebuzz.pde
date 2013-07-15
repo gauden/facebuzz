@@ -1,4 +1,13 @@
-// Original Dog image by Tiago (CC BY 2.0) http://flic.kr/p/ejmQsA
+/** 
+ **   F A C E B U Z Z: 
+ **   A toy for decorating bitmaps with vector blobs
+ **
+ **   FaceBuzz by Gauden Galea, 2013
+ **   GUI Classes by Mick Grierson, Matthew Yee-King, Marco Gillies
+ **    
+ **   Software is licensed under the MIT license, see LICENSE
+ **   Dog image by Tiago (CC BY 2.0) http://flic.kr/p/ejmQsA
+ **/
 
 Handle handle;
 Mustache mustache;
@@ -6,7 +15,9 @@ Menu MENU;
 PImage img;
 boolean DRAGGED = false;
 boolean JUST_SAVED_IMG = false;
-String fileName;
+String INPUT_IMAGE = "dog.png";
+String fileName = "";
+boolean JAVASCRIPT_MODE = false;
 
 // uncomment for debugging
 String txtOutput;
@@ -16,8 +27,17 @@ void setup() {
   size(640, 480);
   MENU = new Menu();
   mustache = new Mustache(MENU);
-  img = loadImage("dog.png");
+  img = loadImage(INPUT_IMAGE);
   smooth();
+  
+  // Hack to detect if this is running in Java or Javascript mode
+  // Java will download the same image twice for t1 and t2
+  // JavaScript has no access to data folder, so t2 is empty
+  // Note: There is probably a neater way of doing this.
+  /* @pjs preload="icon_fill.png"; */
+  PImage t1 = loadImage("icon_fill.png");
+  PImage t2 = loadImage("./data/icon_fill.png");
+  JAVASCRIPT_MODE = t1.pixels.length != t2.pixels.length;
 
   // uncomment for debugging
   fill(color(255, 255, 255));
@@ -35,7 +55,7 @@ void draw() {
     mustache.render();
 
     // save to disc
-    fileName = year() + "_" + day() + "_" + hour() + "_" + minute() + "_" + second() + "_" + millis() + ".png";
+    fileName = year() + "_" + day() + "_" + hour() + "_" + minute() + "_" + second() + "_" + millis() + ".jpeg";
     save("./data/" + fileName);
     JUST_SAVED_IMG = true;
     mustache.SAVING_IMAGE = true;
@@ -54,9 +74,9 @@ void draw() {
     mustache.render();
     if (mustache.DISPLAY_GUI) MENU.render();
   }
-  
+
   if (JUST_SAVED_IMG) render_saved();
-  
+
 
   // uncomment for debugging
   //  fill(color(255, 255, 255, 255));
@@ -67,14 +87,14 @@ void draw() {
 
 void mouseReleased() {
   if (JUST_SAVED_IMG) JUST_SAVED_IMG=false;
-  
+
   if (mustache.SAVING_IMAGE) {
     mustache.DISPLAY_GUI = false;
     mustache.SAVING_IMAGE = false;
   }
   if (mustache.DISPLAY_GUI) {
     String menu_choice = MENU.checkButtons();
-    if (menu_choice != "") {
+    if (!menu_choice.equals("")) {
       mustache.do_command(menu_choice);
     }
   }
@@ -130,9 +150,9 @@ class Widget
   
   
   void setInactiveColor(color c)
-  {
-    inactiveColor = c;
-    bgColor = inactiveColor;
+  { // commented out for facebuzz
+//    inactiveColor = c;
+//    bgColor = inactiveColor;
   }
   
   color getInactiveColor()
@@ -141,8 +161,8 @@ class Widget
   }
   
   void setActiveColor(color c)
-  {
-    activeColor = c;
+  { // commented out for facebuzz
+//    activeColor = c;
   }
   
   color getActiveColor()
@@ -284,9 +304,9 @@ class Button extends Widget
       imageMode(CORNER);
       //tint(imageTint);
       image(currentImage, pos.x, pos.y, imgWidth, extents.y);
-      stroke(bgColor);
-      noFill();
-      rect(pos.x, pos.y, imgWidth,  extents.y);
+//      stroke(bgColor);
+//      noFill();
+//      rect(pos.x, pos.y, imgWidth,  extents.y);
       //noTint();
       popStyle();
     }
@@ -813,17 +833,17 @@ class Menu {
     w = 36;
     h = 36;
     
-    addButton("stroke", "./data/icon_stroke.png");
-    addButton("fill", "./data/icon_fill.png");
-    addButton("transparent", "./data/icon_swatch_transparent.png");
-    addButton("red", "./data/icon_swatch_red.png");
-    addButton("green", "./data/icon_swatch_green.png");
-    addButton("yellow", "./data/icon_swatch_yellow.png");
-    addButton("blue", "./data/icon_swatch_blue.png");
-    addButton("white", "./data/icon_swatch_white.png");
-    addButton("kontrast", "./data/icon_swatch_black.png");
+    addButton("stroke", "icon_stroke.png");
+    addButton("fill", "icon_fill.png");
+    addButton("transparent", "icon_swatch_transparent.png");
+    addButton("red", "icon_swatch_red.png");
+    addButton("green", "icon_swatch_green.png");
+    addButton("yellow", "icon_swatch_yellow.png");
+    addButton("blue", "icon_swatch_blue.png");
+    addButton("white", "icon_swatch_white.png");
+    addButton("black", "icon_swatch_black.png");
     x = width - BTN_WIDTH - BTN_SPACING;
-    addButton("discsave", "./data/icon_discsave.png");
+    addButton("save", "icon_discsave.png");
   }
   
   public String checkButtons() {
@@ -959,49 +979,41 @@ class Mustache {
   }
   
   public void do_command(String choice) {
-    char c = (char) choice.charAt(0);
-    switch (c) {
-      case 'f':
+    if (choice.equals("fill")) {
 //        println("Turn fill on");
         FILL = true;
-        break;
-      case 's':
+    } else if (choice.equals("stroke")) {
 //        println("Turn stroke on");
         FILL = false;
-        break;
-      case 't':
-//        println("Turn transparency on");
+    } else if (choice.equals("transparent")) {
+//        println("Toggle transparency");
         TRANSPARENCY = !TRANSPARENCY;
-        break;
-      case 'r':
+    } else if (choice.equals("red")) {
 //        println("Red");
         CLR = RED;
-        break;
-      case 'g':
+    } else if (choice.equals("green")) {
 //        println("Green");
         CLR = GREEN;
-        break;
-      case 'b':
+    } else if (choice.equals("blue")) {
 //        println("Blue");
         CLR = BLUE;
-        break;
-      case 'y':
+    } else if (choice.equals("yellow")) {
 //        println("Yellow");
         CLR = YELLOW;
-        break;
-      case 'w':
+    } else if (choice.equals("white")) {
 //        println("White");
         CLR = WHITE;
-        break;
-      case 'k':
+    } else if (choice.equals("black")) {
 //        println("Black");
         CLR = BLACK;
-        break;
-      case 'd':
-        println("Save to disc");
+    } else if (choice.equals("save")) {
+      if (JAVASCRIPT_MODE) {
+        println("JavaScript detected: download image.");
+      } else {
+        println("Java detected: save to disc");
+      }
         SAVING_IMAGE = true;
-        break;
-      default:
+    } else {
         FILL = true;
         CLR = YELLOW;
     }

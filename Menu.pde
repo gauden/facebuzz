@@ -13,17 +13,17 @@ class Menu {
     w = 36;
     h = 36;
     
-    addButton("stroke", "./data/icon_stroke.png");
-    addButton("fill", "./data/icon_fill.png");
-    addButton("transparent", "./data/icon_swatch_transparent.png");
-    addButton("red", "./data/icon_swatch_red.png");
-    addButton("green", "./data/icon_swatch_green.png");
-    addButton("yellow", "./data/icon_swatch_yellow.png");
-    addButton("blue", "./data/icon_swatch_blue.png");
-    addButton("white", "./data/icon_swatch_white.png");
-    addButton("kontrast", "./data/icon_swatch_black.png");
+    addButton("stroke", "icon_stroke.png");
+    addButton("fill", "icon_fill.png");
+    addButton("transparent", "icon_swatch_transparent.png");
+    addButton("red", "icon_swatch_red.png");
+    addButton("green", "icon_swatch_green.png");
+    addButton("yellow", "icon_swatch_yellow.png");
+    addButton("blue", "icon_swatch_blue.png");
+    addButton("white", "icon_swatch_white.png");
+    addButton("black", "icon_swatch_black.png");
     x = width - BTN_WIDTH - BTN_SPACING;
-    addButton("discsave", "./data/icon_discsave.png");
+    addButton("save", "icon_discsave.png");
   }
   
   public String checkButtons() {

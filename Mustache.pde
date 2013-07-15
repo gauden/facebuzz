@@ -93,49 +93,41 @@ class Mustache {
   }
   
   public void do_command(String choice) {
-    char c = (char) choice.charAt(0);
-    switch (c) {
-      case 'f':
+    if (choice.equals("fill")) {
 //        println("Turn fill on");
         FILL = true;
-        break;
-      case 's':
+    } else if (choice.equals("stroke")) {
 //        println("Turn stroke on");
         FILL = false;
-        break;
-      case 't':
-//        println("Turn transparency on");
+    } else if (choice.equals("transparent")) {
+//        println("Toggle transparency");
         TRANSPARENCY = !TRANSPARENCY;
-        break;
-      case 'r':
+    } else if (choice.equals("red")) {
 //        println("Red");
         CLR = RED;
-        break;
-      case 'g':
+    } else if (choice.equals("green")) {
 //        println("Green");
         CLR = GREEN;
-        break;
-      case 'b':
+    } else if (choice.equals("blue")) {
 //        println("Blue");
         CLR = BLUE;
-        break;
-      case 'y':
+    } else if (choice.equals("yellow")) {
 //        println("Yellow");
         CLR = YELLOW;
-        break;
-      case 'w':
+    } else if (choice.equals("white")) {
 //        println("White");
         CLR = WHITE;
-        break;
-      case 'k':
+    } else if (choice.equals("black")) {
 //        println("Black");
         CLR = BLACK;
-        break;
-      case 'd':
-        println("Save to disc");
+    } else if (choice.equals("save")) {
+//      if (JAVASCRIPT_MODE) {
+//        println("JavaScript detected: download image.");
+//      } else {
+//        println("Java detected: save to disc");
+//      }
         SAVING_IMAGE = true;
-        break;
-      default:
+    } else {
         FILL = true;
         CLR = YELLOW;
     }

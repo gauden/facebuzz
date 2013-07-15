@@ -1,6 +1,6 @@
 /** 
  **   F A C E B U Z Z: 
- **   A toy for defacing bitmaps with vectors
+ **   A toy for decorating bitmaps with vector blobs
  **
  **   FaceBuzz by Gauden Galea, 2013
  **   GUI Classes by Mick Grierson, Matthew Yee-King, Marco Gillies
@@ -17,6 +17,7 @@ boolean DRAGGED = false;
 boolean JUST_SAVED_IMG = false;
 String INPUT_IMAGE = "dog.png";
 String fileName = "";
+boolean JAVASCRIPT_MODE = false;
 
 // uncomment for debugging
 String txtOutput;
@@ -28,6 +29,15 @@ void setup() {
   mustache = new Mustache(MENU);
   img = loadImage(INPUT_IMAGE);
   smooth();
+  
+  // Hack to detect if this is running in Java or Javascript mode
+  // Java will download the same image twice for t1 and t2
+  // JavaScript has no access to data folder, so t2 is empty
+  // Note: There is probably a neater way of doing this.
+  /* @pjs preload="icon_fill.png"; */
+  PImage t1 = loadImage("icon_fill.png");
+  PImage t2 = loadImage("./data/icon_fill.png");
+  JAVASCRIPT_MODE = t1.pixels.length != t2.pixels.length;
 
   // uncomment for debugging
   fill(color(255, 255, 255));
@@ -64,9 +74,9 @@ void draw() {
     mustache.render();
     if (mustache.DISPLAY_GUI) MENU.render();
   }
-  
+
   if (JUST_SAVED_IMG) render_saved();
-  
+
 
   // uncomment for debugging
   //  fill(color(255, 255, 255, 255));
@@ -77,14 +87,14 @@ void draw() {
 
 void mouseReleased() {
   if (JUST_SAVED_IMG) JUST_SAVED_IMG=false;
-  
+
   if (mustache.SAVING_IMAGE) {
     mustache.DISPLAY_GUI = false;
     mustache.SAVING_IMAGE = false;
   }
   if (mustache.DISPLAY_GUI) {
     String menu_choice = MENU.checkButtons();
-    if (menu_choice != "") {
+    if (!menu_choice.equals("")) {
       mustache.do_command(menu_choice);
     }
   }
